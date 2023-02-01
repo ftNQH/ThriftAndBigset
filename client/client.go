@@ -52,7 +52,10 @@ func handleClient(client user_item.Item) (err error) {
 		IsLootbox:         false,
 	}*/
 
-	client.GetItem(ctx, 0, 3)
+	_, err = client.GetItem(ctx, 0, 3)
+	if err != nil {
+		return err
+	}
 	/*client.AddItem(ctx, int16(item.ID), &item)
 	fmt.Println("thêm item thành công")*/
 	/*client.DeleteItem(ctx, 3)

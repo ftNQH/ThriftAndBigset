@@ -38,8 +38,7 @@ type thriftHandler struct {
 func (t thriftHandler) GetItem(ctx context.Context, post int16, count int16) (r user_item.ItemList, err error) {
 	var host = "127.0.0.1"
 	var port = "18823"
-	var connTimeout time.Duration
-	connTimeout = time.Second * 3600
+	var connTimeout = time.Second * 3600
 	client, _ := GetConnect(host, port, connTimeout)
 	result, _ := client.BsGetSlice(ctx, "item", int32(post), int32(count))
 	logrus.Error(client.GetTotalCount(ctx, "item"))
@@ -47,7 +46,10 @@ func (t thriftHandler) GetItem(ctx context.Context, post int16, count int16) (r 
 
 	for _, a := range result.Items.Items {
 		var item user_item.TItem
-		json.Unmarshal(a.Value, &item)
+		err := json.Unmarshal(a.Value, &item)
+		if err != nil {
+			return nil, err
+		}
 		items = append(items, &item)
 	}
 	logrus.Error(items)
@@ -57,8 +59,7 @@ func (t thriftHandler) GetItem(ctx context.Context, post int16, count int16) (r 
 func (t thriftHandler) DeleteItem(ctx context.Context, id int16) (r *user_item.TItem, err error) {
 	var host = "127.0.0.1"
 	var port = "18823"
-	var connTimeout time.Duration
-	connTimeout = time.Second * 3600
+	var connTimeout = time.Second * 3600
 	client, _ := GetConnect(host, port, connTimeout)
 	bData, _ := json.Marshal(id)
 	result, err := client.BsGetItem(ctx, "item", bData)
@@ -80,8 +81,7 @@ func (t thriftHandler) DeleteItem(ctx context.Context, id int16) (r *user_item.T
 func (t thriftHandler) AddItem(ctx context.Context, id int16, item *user_item.TItem) (r *user_item.TItem, err error) {
 	var host = "127.0.0.1"
 	var port = "18823"
-	var connTimeout time.Duration
-	connTimeout = time.Second * 3600
+	var connTimeout = time.Second * 3600
 	client, _ := GetConnect(host, port, connTimeout)
 	bDataId, _ := json.Marshal(id)
 	result, err := client.BsGetItem(ctx, "item", bDataId)
@@ -109,8 +109,7 @@ func (t thriftHandler) AddItem(ctx context.Context, id int16, item *user_item.TI
 func (t thriftHandler) EditItems(ctx context.Context, id int16, item *user_item.TItem) (r *user_item.TItem, err error) {
 	var host = "127.0.0.1"
 	var port = "18823"
-	var connTimeout time.Duration
-	connTimeout = time.Second * 3600
+	var connTimeout = time.Second * 3600
 	client, _ := GetConnect(host, port, connTimeout)
 	c, _ := json.Marshal(id)
 	result, err := client.BsGetItem(ctx, "item", c)
@@ -126,7 +125,10 @@ func (t thriftHandler) EditItems(ctx context.Context, id int16, item *user_item.
 	a, _ := json.Marshal(item)
 	b.Key = c
 	b.Value = a
-	client.BsPutItem(ctx, "item", &b)
+	_, err = client.BsPutItem(ctx, "item", &b)
+	if err != nil {
+		return nil, err
+	}
 	fmt.Println("Edit - Sửa item thành công")
 
 	return item, nil
@@ -135,33 +137,39 @@ func (t thriftHandler) EditItems(ctx context.Context, id int16, item *user_item.
 func (t thriftHandler) AddUser(ctx context.Context, user *user_item.TUser) (r *user_item.TUser, err error) {
 	var host = "127.0.0.1"
 	var port = "18823"
-	var connTimeout time.Duration
-	connTimeout = time.Second * 3600
+	var connTimeout = time.Second * 3600
 	client, _ := GetConnect(host, port, connTimeout)
 	TItem := BigSetKV.NewTItem()
 	bData, _ := json.Marshal(user)
 	TItem.Value = bData
 	TItem.Key, _ = json.Marshal(user.UID)
-	client.BsPutItem(ctx, "user", TItem)
+	_, err = client.BsPutItem(ctx, "user", TItem)
+	if err != nil {
+		return nil, err
+	}
 	return user, nil
 }
 
 func (t thriftHandler) GetItemByUID(ctx context.Context, id int16) (r *user_item.TItem, err error) {
 	var host = "127.0.0.1"
 	var port = "18823"
-	var connTimeout time.Duration
-	connTimeout = time.Second * 3600
+	var connTimeout = time.Second * 3600
 	client, _ := GetConnect(host, port, connTimeout)
 	length, _ := client.GetTotalCount(ctx, "item")
 	result, _ := client.BsGetSlice(ctx, "item", 0, int32(length))
 	var b user_item.TItem
-	var c BigSetKV.TStringKey
-	c = BigSetKV.TStringKey(strconv.Itoa(int(id)) + "itembyUID")
+	var c = BigSetKV.TStringKey(strconv.Itoa(int(id)) + "itembyUID")
 	for _, a := range result.Items.Items {
 
-		json.Unmarshal(a.Value, &b)
+		err := json.Unmarshal(a.Value, &b)
+		if err != nil {
+			return nil, err
+		}
 		if b.OwnerUID == id {
-			client.BsPutItem(ctx, c, a)
+			_, err = client.BsPutItem(ctx, c, a)
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 
