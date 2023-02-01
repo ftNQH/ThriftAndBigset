@@ -26,6 +26,6 @@
 * Using build.sh to autobuild this project
 
 #HowToRun 
-*Run Binary server in directory server by using: ./server (run in terrminal cd to server)
-*Run Binary clientgin in directory clientgin by using: ./clientgin (run in another terminal cd to clientgin)
-*Test this project in http://localhost:8080/swagger/index.html
+  * Run Binary server in directory server by using: ./server (run in terrminal cd to server)
+  * Run Binary clientgin in directory clientgin by using: ./clientgin (run in another terminal cd to clientgin)
+  * Test this project in http://localhost:8080/swagger/index.html
