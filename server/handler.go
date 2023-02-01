@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/apache/thrift/lib/go/thrift"
+	"github.com/sirupsen/logrus"
 	"projectThrift/gen-go/OpenStars/Core/BigSetKV"
 	"projectThrift/gen-go/user_item"
 	"strconv"
@@ -41,13 +42,15 @@ func (t thriftHandler) GetItem(ctx context.Context, post int16, count int16) (r 
 	connTimeout = time.Second * 3600
 	client, _ := GetConnect(host, port, connTimeout)
 	result, _ := client.BsGetSlice(ctx, "item", int32(post), int32(count))
+	logrus.Error(client.GetTotalCount(ctx, "item"))
 	var items user_item.ItemList
+
 	for _, a := range result.Items.Items {
 		var item user_item.TItem
 		json.Unmarshal(a.Value, &item)
 		items = append(items, &item)
 	}
-	fmt.Println(items)
+	logrus.Error(items)
 	return items, nil
 }
 
@@ -126,7 +129,7 @@ func (t thriftHandler) EditItems(ctx context.Context, id int16, item *user_item.
 	client.BsPutItem(ctx, "item", &b)
 	fmt.Println("Edit - Sửa item thành công")
 
-	return nil, nil
+	return item, nil
 }
 
 func (t thriftHandler) AddUser(ctx context.Context, user *user_item.TUser) (r *user_item.TUser, err error) {

@@ -1,0 +1,327 @@
+definitions:
+  user_item.TCurrencyAddress:
+    properties:
+      Address:
+        type: string
+      Chain:
+        type: string
+      Decimal:
+        type: integer
+      Img:
+        description: 'unused field # 6'
+        type: string
+      Name:
+        type: string
+      Status:
+        type: boolean
+      Symbol:
+        type: string
+    type: object
+  user_item.TExtendData:
+    properties:
+      Category:
+        type: string
+      Collection:
+        type: string
+      Create:
+        type: string
+      Like:
+        type: string
+      Owner:
+        type: string
+      TotalOffer:
+        type: string
+    type: object
+  user_item.TItem:
+    properties:
+      ArrOwnerAddress:
+        additionalProperties:
+          type: integer
+        type: object
+      ArrOwnerUid:
+        additionalProperties:
+          type: integer
+        type: object
+      CategoryType:
+        type: integer
+      Chain:
+        type: string
+      CollectionId:
+        type: integer
+      ContractAddress:
+        type: string
+      CreateTime:
+        type: integer
+      CreatorAddress:
+        type: string
+      CreatorUid:
+        type: integer
+      CurrencyAddress:
+        $ref: '#/definitions/user_item.TCurrencyAddress'
+      Edition:
+        type: integer
+      EndAt:
+        type: integer
+      EventIds:
+        items:
+          type: integer
+        type: array
+      ExtendData:
+        $ref: '#/definitions/user_item.TExtendData'
+      ExternalLink:
+        type: string
+      Hidden:
+        type: boolean
+      Id:
+        type: integer
+      ImageUrl:
+        type: string
+      IsLootbox:
+        type: boolean
+      IsSensitive:
+        type: boolean
+      MediaType:
+        type: string
+      MetaData:
+        type: string
+      Name:
+        type: string
+      OwnerAddress:
+        type: string
+      OwnerUID:
+        type: integer
+      Price:
+        type: string
+      ProductNo:
+        type: string
+      StartAt:
+        type: integer
+      Status:
+        type: integer
+      TokenId:
+        type: string
+      TotalClaim:
+        type: integer
+      TotalEdition:
+        type: integer
+      TotalLike:
+        type: integer
+      TotalLimit:
+        type: integer
+      TotalView:
+        type: integer
+      TypeNft:
+        type: integer
+      UnlockableContent:
+        type: string
+      UpdateTime:
+        type: integer
+      Url:
+        type: string
+    type: object
+  user_item.TUser:
+    properties:
+      App:
+        type: string
+      Avatar:
+        type: string
+      Background:
+        type: string
+      Bio:
+        type: string
+      Block:
+        type: boolean
+      BlockchainAddress:
+        type: string
+      CanMint:
+        type: boolean
+      CountryCode:
+        type: string
+      CreateTime:
+        type: integer
+      Deleted:
+        type: boolean
+      Email:
+        type: string
+      ExtendData:
+        $ref: '#/definitions/user_item.TExtendData'
+      Facebook:
+        type: string
+      Instagram:
+        type: string
+      IsPartner:
+        type: boolean
+      Language:
+        type: string
+      Name:
+        type: string
+      Pubkey:
+        type: string
+      TotalFollers:
+        type: integer
+      TotalFollowing:
+        type: integer
+      Twitter:
+        type: string
+      TypeUser:
+        type: integer
+      Uid:
+        type: integer
+      UpdateTime:
+        type: integer
+      Username:
+        type: string
+      Verify:
+        type: boolean
+      Vip:
+        type: integer
+      Youtube:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /item:
+    get:
+      consumes:
+      - application/json
+      description: do ping
+      parameters:
+      - description: position
+        in: query
+        name: pos
+        type: integer
+      - description: count
+        in: query
+        name: count
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user_item.TItem'
+      summary: ping example
+      tags:
+      - Item
+    post:
+      consumes:
+      - application/json
+      description: do ping
+      parameters:
+      - description: 'Thông tin item mới '
+        in: body
+        name: NewItem
+        required: true
+        schema:
+          $ref: '#/definitions/user_item.TItem'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user_item.TItem'
+      summary: ping example
+      tags:
+      - Item
+  /item/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: do ping
+      parameters:
+      - description: Id cần xóa
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user_item.TItem'
+      summary: ping example
+      tags:
+      - Item
+    put:
+      consumes:
+      - application/json
+      description: do ping
+      parameters:
+      - description: ID cần sửa
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Thông tin cần sửa
+        in: body
+        name: ItemEdit
+        required: true
+        schema:
+          $ref: '#/definitions/user_item.TItem'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user_item.TItem'
+      summary: ping example
+      tags:
+      - Item
+  /item/{uid}:
+    get:
+      consumes:
+      - application/json
+      description: do ping
+      parameters:
+      - description: 'ID của người dùng cần tìm kiếm '
+        in: path
+        name: uid
+        required: true
+        type: integer
+      - description: position
+        in: query
+        name: pos
+        type: integer
+      - description: count
+        in: query
+        name: count
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user_item.TItem'
+      summary: ping example
+      tags:
+      - Item
+  /user:
+    post:
+      consumes:
+      - application/json
+      description: do ping
+      parameters:
+      - description: 'Thông tin user mới '
+        in: body
+        name: NewUser
+        required: true
+        schema:
+          $ref: '#/definitions/user_item.TUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user_item.TUser'
+      summary: ping example
+      tags:
+      - User
+swagger: "2.0"
