@@ -39,7 +39,8 @@ func (t thriftHandler) GetItem(ctx context.Context, post int16, count int16) (r 
 	var host = "127.0.0.1"
 	var port = "18823"
 	var connTimeout = time.Second * 3600
-	client, _ := GetConnect(host, port, connTimeout)
+	client, _, transport := GetConnect(host, port, connTimeout)
+	defer transport.Close()
 	result, _ := client.BsGetSlice(ctx, "item", int32(post), int32(count))
 	logrus.Error(client.GetTotalCount(ctx, "item"))
 	var items user_item.ItemList
@@ -60,7 +61,8 @@ func (t thriftHandler) DeleteItem(ctx context.Context, id int16) (r *user_item.T
 	var host = "127.0.0.1"
 	var port = "18823"
 	var connTimeout = time.Second * 3600
-	client, _ := GetConnect(host, port, connTimeout)
+	client, _, transport := GetConnect(host, port, connTimeout)
+	defer transport.Close()
 	bData, _ := json.Marshal(id)
 	result, err := client.BsGetItem(ctx, "item", bData)
 	if err != nil {
@@ -82,7 +84,8 @@ func (t thriftHandler) AddItem(ctx context.Context, id int16, item *user_item.TI
 	var host = "127.0.0.1"
 	var port = "18823"
 	var connTimeout = time.Second * 3600
-	client, _ := GetConnect(host, port, connTimeout)
+	client, _, transport := GetConnect(host, port, connTimeout)
+	defer transport.Close()
 	bDataId, _ := json.Marshal(id)
 	result, err := client.BsGetItem(ctx, "item", bDataId)
 	if err != nil {
@@ -93,11 +96,11 @@ func (t thriftHandler) AddItem(ctx context.Context, id int16, item *user_item.TI
 		return nil, err
 	}
 	bData, _ := json.Marshal(item)
-	TItem := BigSetKV.NewTItem()
-	TItem.Value = bData
+	tItem := BigSetKV.NewTItem()
+	tItem.Value = bData
 	strKey := strconv.FormatInt(int64(item.ID), 10)
-	TItem.Key = []byte(strKey)
-	_, err = client.BsPutItem(ctx, "item", TItem)
+	tItem.Key = []byte(strKey)
+	_, err = client.BsPutItem(ctx, "item", tItem)
 	if err != nil {
 		return nil, err
 
@@ -110,7 +113,8 @@ func (t thriftHandler) EditItems(ctx context.Context, id int16, item *user_item.
 	var host = "127.0.0.1"
 	var port = "18823"
 	var connTimeout = time.Second * 3600
-	client, _ := GetConnect(host, port, connTimeout)
+	client, _, transport := GetConnect(host, port, connTimeout)
+	defer transport.Close()
 	c, _ := json.Marshal(id)
 	result, err := client.BsGetItem(ctx, "item", c)
 	if result == nil {
@@ -138,52 +142,55 @@ func (t thriftHandler) AddUser(ctx context.Context, user *user_item.TUser) (r *u
 	var host = "127.0.0.1"
 	var port = "18823"
 	var connTimeout = time.Second * 3600
-	client, _ := GetConnect(host, port, connTimeout)
-	TItem := BigSetKV.NewTItem()
+	client, _, transport := GetConnect(host, port, connTimeout)
+	defer transport.Close()
+	tItem := BigSetKV.NewTItem()
 	bData, _ := json.Marshal(user)
-	TItem.Value = bData
-	TItem.Key, _ = json.Marshal(user.UID)
-	_, err = client.BsPutItem(ctx, "user", TItem)
+	tItem.Value = bData
+	tItem.Key, _ = json.Marshal(user.UID)
+	_, err = client.BsPutItem(ctx, "user", tItem)
 	if err != nil {
 		return nil, err
 	}
 	return user, nil
 }
 
-func (t thriftHandler) GetItemByUID(ctx context.Context, id int16) (r *user_item.TItem, err error) {
+func (t thriftHandler) GetItemByUID(ctx context.Context, id int16) (r user_item.ItemListById, err error) {
 	var host = "127.0.0.1"
 	var port = "18823"
 	var connTimeout = time.Second * 3600
-	client, _ := GetConnect(host, port, connTimeout)
+	client, _, transport := GetConnect(host, port, connTimeout)
+	defer transport.Close()
+	var c = BigSetKV.TStringKey(strconv.Itoa(int(id)) + "_itembyUID")
+	var b user_item.TItem
+	var list user_item.ItemListById
 	length, _ := client.GetTotalCount(ctx, "item")
 	result, _ := client.BsGetSlice(ctx, "item", 0, int32(length))
-	var b user_item.TItem
-	var c = BigSetKV.TStringKey(strconv.Itoa(int(id)) + "itembyUID")
 	for _, a := range result.Items.Items {
-
 		err := json.Unmarshal(a.Value, &b)
 		if err != nil {
 			return nil, err
 		}
 		if b.OwnerUID == id {
+			temp := b
+			list = append(list, &temp)
 			_, err = client.BsPutItem(ctx, c, a)
 			if err != nil {
 				return nil, err
 			}
 		}
 	}
-
-	return &b, nil
+	return list, nil
 }
 
 func NewThriftHandler() *thriftHandler {
 	return &thriftHandler{log: make(map[int]*user_item.TItem)}
 }
 
-func GetConnect(host string, port string, connTimeout time.Duration) (*BigSetKV.TStringBigSetKVServiceClient, error) {
+func GetConnect(host string, port string, connTimeout time.Duration) (*BigSetKV.TStringBigSetKVServiceClient, error, thrift.TTransport) {
 	socket, err := thrift.NewTSocketTimeout(fmt.Sprintf("%s:%s", host, port), connTimeout)
 	if err != nil {
-		return nil, err
+		return nil, err, nil
 	}
 	protocolFactory := thrift.NewTBinaryProtocolFactory(true, true)
 	var transportFactory thrift.TTransportFactory
@@ -195,7 +202,7 @@ func GetConnect(host string, port string, connTimeout time.Duration) (*BigSetKV.
 	err = transport.Open()
 	if err != nil {
 		fmt.Println("GetThriftClientCreatorFunc", err)
-		return nil, err
+		return nil, err, nil
 	}
-	return client, nil
+	return client, nil, transport
 }

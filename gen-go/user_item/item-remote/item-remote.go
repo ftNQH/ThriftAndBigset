@@ -12,9 +12,9 @@ import (
 	"net"
 	"net/url"
 	"os"
+	"projectThrift/gen-go/user_item"
 	"strconv"
 	"strings"
-	"user_item"
 )
 
 var _ = user_item.GoUnusedProtection__
@@ -28,7 +28,7 @@ func Usage() {
 	fmt.Fprintln(os.Stderr, "  TItem addItem(i16 id, TItem item)")
 	fmt.Fprintln(os.Stderr, "  TItem editItems(i16 id, TItem item)")
 	fmt.Fprintln(os.Stderr, "  TUser addUser(TUser user)")
-	fmt.Fprintln(os.Stderr, "  TItem getItemByUID(i16 id)")
+	fmt.Fprintln(os.Stderr, "  ItemListById getItemByUID(i16 id)")
 	fmt.Fprintln(os.Stderr)
 	os.Exit(0)
 }
@@ -155,15 +155,15 @@ func main() {
 			fmt.Fprintln(os.Stderr, "GetItem requires 2 args")
 			flag.Usage()
 		}
-		tmp0, err20 := strconv.Atoi(flag.Arg(1))
-		if err20 != nil {
+		tmp0, err21 := (strconv.Atoi(flag.Arg(1)))
+		if err21 != nil {
 			Usage()
 			return
 		}
 		argvalue0 := int16(tmp0)
 		value0 := argvalue0
-		tmp1, err21 := strconv.Atoi(flag.Arg(2))
-		if err21 != nil {
+		tmp1, err22 := (strconv.Atoi(flag.Arg(2)))
+		if err22 != nil {
 			Usage()
 			return
 		}
@@ -177,8 +177,8 @@ func main() {
 			fmt.Fprintln(os.Stderr, "DeleteItem requires 1 args")
 			flag.Usage()
 		}
-		tmp0, err22 := strconv.Atoi(flag.Arg(1))
-		if err22 != nil {
+		tmp0, err23 := (strconv.Atoi(flag.Arg(1)))
+		if err23 != nil {
 			Usage()
 			return
 		}
@@ -192,26 +192,26 @@ func main() {
 			fmt.Fprintln(os.Stderr, "AddItem requires 2 args")
 			flag.Usage()
 		}
-		tmp0, err23 := strconv.Atoi(flag.Arg(1))
-		if err23 != nil {
+		tmp0, err24 := (strconv.Atoi(flag.Arg(1)))
+		if err24 != nil {
 			Usage()
 			return
 		}
 		argvalue0 := int16(tmp0)
 		value0 := argvalue0
-		arg24 := flag.Arg(2)
-		mbTrans25 := thrift.NewTMemoryBufferLen(len(arg24))
-		defer mbTrans25.Close()
-		_, err26 := mbTrans25.WriteString(arg24)
-		if err26 != nil {
+		arg25 := flag.Arg(2)
+		mbTrans26 := thrift.NewTMemoryBufferLen(len(arg25))
+		defer mbTrans26.Close()
+		_, err27 := mbTrans26.WriteString(arg25)
+		if err27 != nil {
 			Usage()
 			return
 		}
-		factory27 := thrift.NewTJSONProtocolFactory()
-		jsProt28 := factory27.GetProtocol(mbTrans25)
+		factory28 := thrift.NewTJSONProtocolFactory()
+		jsProt29 := factory28.GetProtocol(mbTrans26)
 		argvalue1 := user_item.NewTItem()
-		err29 := argvalue1.Read(jsProt28)
-		if err29 != nil {
+		err30 := argvalue1.Read(jsProt29)
+		if err30 != nil {
 			Usage()
 			return
 		}
@@ -224,26 +224,26 @@ func main() {
 			fmt.Fprintln(os.Stderr, "EditItems requires 2 args")
 			flag.Usage()
 		}
-		tmp0, err30 := strconv.Atoi(flag.Arg(1))
-		if err30 != nil {
+		tmp0, err31 := (strconv.Atoi(flag.Arg(1)))
+		if err31 != nil {
 			Usage()
 			return
 		}
 		argvalue0 := int16(tmp0)
 		value0 := argvalue0
-		arg31 := flag.Arg(2)
-		mbTrans32 := thrift.NewTMemoryBufferLen(len(arg31))
-		defer mbTrans32.Close()
-		_, err33 := mbTrans32.WriteString(arg31)
-		if err33 != nil {
+		arg32 := flag.Arg(2)
+		mbTrans33 := thrift.NewTMemoryBufferLen(len(arg32))
+		defer mbTrans33.Close()
+		_, err34 := mbTrans33.WriteString(arg32)
+		if err34 != nil {
 			Usage()
 			return
 		}
-		factory34 := thrift.NewTJSONProtocolFactory()
-		jsProt35 := factory34.GetProtocol(mbTrans32)
+		factory35 := thrift.NewTJSONProtocolFactory()
+		jsProt36 := factory35.GetProtocol(mbTrans33)
 		argvalue1 := user_item.NewTItem()
-		err36 := argvalue1.Read(jsProt35)
-		if err36 != nil {
+		err37 := argvalue1.Read(jsProt36)
+		if err37 != nil {
 			Usage()
 			return
 		}
@@ -256,19 +256,19 @@ func main() {
 			fmt.Fprintln(os.Stderr, "AddUser requires 1 args")
 			flag.Usage()
 		}
-		arg37 := flag.Arg(1)
-		mbTrans38 := thrift.NewTMemoryBufferLen(len(arg37))
-		defer mbTrans38.Close()
-		_, err39 := mbTrans38.WriteString(arg37)
-		if err39 != nil {
+		arg38 := flag.Arg(1)
+		mbTrans39 := thrift.NewTMemoryBufferLen(len(arg38))
+		defer mbTrans39.Close()
+		_, err40 := mbTrans39.WriteString(arg38)
+		if err40 != nil {
 			Usage()
 			return
 		}
-		factory40 := thrift.NewTJSONProtocolFactory()
-		jsProt41 := factory40.GetProtocol(mbTrans38)
+		factory41 := thrift.NewTJSONProtocolFactory()
+		jsProt42 := factory41.GetProtocol(mbTrans39)
 		argvalue0 := user_item.NewTUser()
-		err42 := argvalue0.Read(jsProt41)
-		if err42 != nil {
+		err43 := argvalue0.Read(jsProt42)
+		if err43 != nil {
 			Usage()
 			return
 		}
@@ -281,8 +281,8 @@ func main() {
 			fmt.Fprintln(os.Stderr, "GetItemByUID requires 1 args")
 			flag.Usage()
 		}
-		tmp0, err43 := strconv.Atoi(flag.Arg(1))
-		if err43 != nil {
+		tmp0, err44 := (strconv.Atoi(flag.Arg(1)))
+		if err44 != nil {
 			Usage()
 			return
 		}

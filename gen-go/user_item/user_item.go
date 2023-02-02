@@ -3788,7 +3788,7 @@ type Item interface {
 	AddUser(ctx context.Context, user *TUser) (r *TUser, err error)
 	// Parameters:
 	//  - ID
-	GetItemByUID(ctx context.Context, id int16) (r *TItem, err error)
+	GetItemByUID(ctx context.Context, id int16) (r ItemListById, err error)
 }
 
 type ItemClient struct {
@@ -3885,7 +3885,7 @@ func (p *ItemClient) AddUser(ctx context.Context, user *TUser) (r *TUser, err er
 
 // Parameters:
 //   - ID
-func (p *ItemClient) GetItemByUID(ctx context.Context, id int16) (r *TItem, err error) {
+func (p *ItemClient) GetItemByUID(ctx context.Context, id int16) (r ItemListById, err error) {
 	var _args15 ItemGetItemByUIDArgs
 	_args15.ID = id
 	var _result16 ItemGetItemByUIDResult
@@ -4202,7 +4202,7 @@ func (p *itemProcessorGetItemByUID) Process(ctx context.Context, seqId int32, ip
 
 	iprot.ReadMessageEnd()
 	result := ItemGetItemByUIDResult{}
-	var retval *TItem
+	var retval ItemListById
 	var err2 error
 	if retval, err2 = p.handler.GetItemByUID(ctx, args.ID); err2 != nil {
 		x := thrift.NewTApplicationException(thrift.INTERNAL_ERROR, "Internal error processing getItemByUID: "+err2.Error())
@@ -5540,19 +5540,16 @@ func (p *ItemGetItemByUIDArgs) String() string {
 // Attributes:
 //   - Success
 type ItemGetItemByUIDResult struct {
-	Success *TItem `thrift:"success,0" db:"success" json:"success,omitempty"`
+	Success ItemListById `thrift:"success,0" db:"success" json:"success,omitempty"`
 }
 
 func NewItemGetItemByUIDResult() *ItemGetItemByUIDResult {
 	return &ItemGetItemByUIDResult{}
 }
 
-var ItemGetItemByUIDResult_Success_DEFAULT *TItem
+var ItemGetItemByUIDResult_Success_DEFAULT ItemListById
 
-func (p *ItemGetItemByUIDResult) GetSuccess() *TItem {
-	if !p.IsSetSuccess() {
-		return ItemGetItemByUIDResult_Success_DEFAULT
-	}
+func (p *ItemGetItemByUIDResult) GetSuccess() ItemListById {
 	return p.Success
 }
 func (p *ItemGetItemByUIDResult) IsSetSuccess() bool {
@@ -5574,7 +5571,7 @@ func (p *ItemGetItemByUIDResult) Read(iprot thrift.TProtocol) error {
 		}
 		switch fieldId {
 		case 0:
-			if fieldTypeId == thrift.STRUCT {
+			if fieldTypeId == thrift.LIST {
 				if err := p.ReadField0(iprot); err != nil {
 					return err
 				}
@@ -5599,9 +5596,21 @@ func (p *ItemGetItemByUIDResult) Read(iprot thrift.TProtocol) error {
 }
 
 func (p *ItemGetItemByUIDResult) ReadField0(iprot thrift.TProtocol) error {
-	p.Success = &TItem{}
-	if err := p.Success.Read(iprot); err != nil {
-		return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Success), err)
+	_, size, err := iprot.ReadListBegin()
+	if err != nil {
+		return thrift.PrependError("error reading list begin: ", err)
+	}
+	tSlice := make(ItemListById, 0, size)
+	p.Success = tSlice
+	for i := 0; i < size; i++ {
+		_elem20 := &TItem{}
+		if err := _elem20.Read(iprot); err != nil {
+			return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", _elem20), err)
+		}
+		p.Success = append(p.Success, _elem20)
+	}
+	if err := iprot.ReadListEnd(); err != nil {
+		return thrift.PrependError("error reading list end: ", err)
 	}
 	return nil
 }
@@ -5626,11 +5635,19 @@ func (p *ItemGetItemByUIDResult) Write(oprot thrift.TProtocol) error {
 
 func (p *ItemGetItemByUIDResult) writeField0(oprot thrift.TProtocol) (err error) {
 	if p.IsSetSuccess() {
-		if err := oprot.WriteFieldBegin("success", thrift.STRUCT, 0); err != nil {
+		if err := oprot.WriteFieldBegin("success", thrift.LIST, 0); err != nil {
 			return thrift.PrependError(fmt.Sprintf("%T write field begin error 0:success: ", p), err)
 		}
-		if err := p.Success.Write(oprot); err != nil {
-			return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Success), err)
+		if err := oprot.WriteListBegin(thrift.STRUCT, len(p.Success)); err != nil {
+			return thrift.PrependError("error writing list begin: ", err)
+		}
+		for _, v := range p.Success {
+			if err := v.Write(oprot); err != nil {
+				return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", v), err)
+			}
+		}
+		if err := oprot.WriteListEnd(); err != nil {
+			return thrift.PrependError("error writing list end: ", err)
 		}
 		if err := oprot.WriteFieldEnd(); err != nil {
 			return thrift.PrependError(fmt.Sprintf("%T write field end error 0:success: ", p), err)

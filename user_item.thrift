@@ -105,7 +105,7 @@ service Item {
 	TItem addItem(1:i16 id, 2:TItem item),
 	TItem editItems(1: i16 id, 2:TItem item),
 	TUser addUser(1:TUser user),
-	TItem getItemByUID(1:i16 id)
+	ItemListById getItemByUID(1:i16 id)
 	
 	
 }
