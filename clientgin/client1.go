@@ -5,13 +5,14 @@ import (
 	"crypto/tls"
 	"flag"
 	"fmt"
+	"os"
+	"projectThrift/clientgin/routes/docs"
+
 	"github.com/apache/thrift/lib/go/thrift"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	"os"
-	"projectThrift/clientgin/routes/docs"
 
 	"net/http"
 	"projectThrift/gen-go/user_item"
@@ -20,6 +21,11 @@ import (
 
 var ctx = context.Background()
 var client user_item.Item
+
+type Response struct {
+	Data  map[string]interface{}
+	Error map[string]interface{}
+}
 
 func runClient(transportFactory thrift.TTransportFactory, protocolFactory thrift.TProtocolFactory, addr string, secure bool) (thrift.TTransport, error) {
 	var transport thrift.TTransport
@@ -119,10 +125,10 @@ func main() {
 	r.PUT("/item/:id", editItems)
 	r.POST("/user", addUser)
 	r.GET("/item/:uid", GetItemByUserID)
-	err := r.Run()
+	err := r.Run("localhost:8090")
 	if err != nil {
 		return
-	} // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+	} //listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
 
 // PingExample godoc
@@ -145,8 +151,15 @@ func getItems(c *gin.Context) {
 	val, err := client.GetItem(ctx, int16(position), int16(count))
 	if err != nil {
 		logrus.Error(err)
+
+		b := map[string]interface{}{"code": http.StatusBadRequest, "message": err.Error()}
+		res := Response{Data: nil, Error: b}
+		c.IndentedJSON(http.StatusOK, res)
 	}
-	c.IndentedJSON(http.StatusOK, val)
+	b := map[string]interface{}{"code": http.StatusOK, "message": "Success!"}
+	a := map[string]interface{}{"data": val, "total": len(val)}
+	res := Response{Data: a, Error: b}
+	c.IndentedJSON(http.StatusOK, res)
 }
 
 // PingExample godoc
@@ -164,8 +177,19 @@ func newItems(c *gin.Context) {
 	if err := c.BindJSON(&NewItem); err != nil {
 		return
 	}
-	val, _ := client.AddItem(ctx, int16(NewItem.ID), &NewItem)
-	c.IndentedJSON(http.StatusCreated, val)
+	val, err := client.AddItem(ctx, int16(NewItem.ID), &NewItem)
+
+	if err != nil {
+		b := map[string]interface{}{"code": http.StatusBadRequest, "message": err.Error()}
+		res := Response{Data: nil, Error: b}
+		c.IndentedJSON(http.StatusOK, res)
+		return
+	}
+	b := map[string]interface{}{"code": http.StatusOK, "message": "Success!"}
+	a := map[string]interface{}{"data": val, "err": b}
+	res := Response{Data: a, Error: b}
+
+	c.IndentedJSON(http.StatusCreated, res)
 
 }
 
@@ -184,9 +208,15 @@ func deleteItems(c *gin.Context) {
 	d, _ := strconv.Atoi(id)
 	_, err := client.DeleteItem(ctx, int16(d))
 	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, err)
+		b := map[string]interface{}{"code": http.StatusBadRequest, "message": err.Error()}
+		res := Response{Data: nil, Error: b}
+		c.IndentedJSON(http.StatusOK, res)
+		return
 	}
-	c.IndentedJSON(http.StatusOK, "xóa thành công")
+	b := map[string]interface{}{"code": http.StatusOK, "message": "Success!"}
+	a := map[string]interface{}{"data": "Xoá thành công"}
+	res := Response{Data: a, Error: b}
+	c.IndentedJSON(http.StatusOK, res)
 }
 
 // PingExample godoc
@@ -206,12 +236,20 @@ func editItems(c *gin.Context) {
 	var ItemEdit user_item.TItem
 	if err := c.BindJSON(&ItemEdit); err != nil {
 		c.IndentedJSON(http.StatusNotFound, err)
+		return
 	}
 	val, err := client.EditItems(ctx, int16(d), &ItemEdit)
 	if err != nil {
-		c.IndentedJSON(http.StatusNotFound, err)
+		b := map[string]interface{}{"code": http.StatusBadRequest, "message": err.Error()}
+		a := map[string]interface{}{"data": nil}
+		res := Response{Data: a, Error: b}
+		c.IndentedJSON(http.StatusOK, res)
+		return
 	}
-	c.IndentedJSON(http.StatusOK, &val)
+	b := map[string]interface{}{"code": http.StatusOK, "message": "Success!"}
+	a := map[string]interface{}{"data": val}
+	res := Response{Data: a, Error: b}
+	c.IndentedJSON(http.StatusOK, res)
 }
 
 // PingExample godoc
@@ -228,9 +266,20 @@ func addUser(c *gin.Context) {
 	var NewUser user_item.TUser
 	if err := c.BindJSON(&NewUser); err != nil {
 		c.IndentedJSON(http.StatusNotFound, err)
+		return
 	}
-	val, _ := client.AddUser(ctx, &NewUser)
-	c.IndentedJSON(http.StatusCreated, val)
+	_, err := client.AddUser(ctx, &NewUser)
+	if err != nil {
+		b := map[string]interface{}{"code": http.StatusBadRequest, "message": err.Error()}
+		a := map[string]interface{}{"data": nil}
+		res := Response{Data: a, Error: b}
+		c.IndentedJSON(http.StatusOK, res)
+		return
+	}
+	b := map[string]interface{}{"code": http.StatusOK, "message": "Success!"}
+	a := map[string]interface{}{"data": NewUser}
+	res := Response{Data: a, Error: b}
+	c.IndentedJSON(http.StatusOK, res)
 
 }
 
@@ -248,6 +297,16 @@ func addUser(c *gin.Context) {
 // @Router /item/{uid} [get]
 func GetItemByUserID(c *gin.Context) {
 	uid, _ := strconv.Atoi(c.Param("uid"))
-	val, _ := client.GetItemByUID(ctx, int16(uid))
-	c.IndentedJSON(http.StatusOK, val)
+	val, err := client.GetItemByUID(ctx, int16(uid))
+	if err != nil {
+		b := map[string]interface{}{"code": http.StatusBadRequest, "message": err.Error()}
+		a := map[string]interface{}{"data": nil}
+		res := Response{Data: a, Error: b}
+		c.IndentedJSON(http.StatusOK, res)
+		return
+	}
+	b := map[string]interface{}{"code": http.StatusBadRequest, "message": "Success!"}
+	a := map[string]interface{}{"data": val, "total": len(val)}
+	res := Response{Data: a, Error: b}
+	c.IndentedJSON(http.StatusOK, res)
 }

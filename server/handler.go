@@ -3,13 +3,15 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
-	"github.com/apache/thrift/lib/go/thrift"
-	"github.com/sirupsen/logrus"
 	"projectThrift/gen-go/OpenStars/Core/BigSetKV"
 	"projectThrift/gen-go/user_item"
 	"strconv"
 	"time"
+
+	"github.com/apache/thrift/lib/go/thrift"
+	"github.com/sirupsen/logrus"
 )
 
 /*
@@ -69,7 +71,7 @@ func (t thriftHandler) DeleteItem(ctx context.Context, id int16) (r *user_item.T
 		return nil, err
 	}
 	if result.Item == nil {
-		fmt.Println("Xóa - Item không tồn tại")
+		err = errors.New("Item không tồn tại")
 		return nil, err
 	}
 
@@ -92,7 +94,7 @@ func (t thriftHandler) AddItem(ctx context.Context, id int16, item *user_item.TI
 		return nil, err
 	}
 	if result.Item != nil {
-		fmt.Println("Add - Item đã tồn tại")
+		err = errors.New("Item đã tồn tại")
 		return nil, err
 	}
 	bData, _ := json.Marshal(item)
@@ -117,8 +119,8 @@ func (t thriftHandler) EditItems(ctx context.Context, id int16, item *user_item.
 	defer transport.Close()
 	c, _ := json.Marshal(id)
 	result, err := client.BsGetItem(ctx, "item", c)
-	if result == nil {
-		fmt.Println("Edit - Item chưa tồn tại")
+	if result.Item == nil {
+		err = errors.New("Item chưa tồn tại")
 		return nil, err
 	}
 	if err != nil {
@@ -148,6 +150,14 @@ func (t thriftHandler) AddUser(ctx context.Context, user *user_item.TUser) (r *u
 	bData, _ := json.Marshal(user)
 	tItem.Value = bData
 	tItem.Key, _ = json.Marshal(user.UID)
+	result, err := client.BsGetItem(ctx, "user", tItem.Key)
+	if err != nil {
+		return nil, err
+	}
+	if result.Item != nil {
+		err = errors.New("User đã tồn tại")
+		return nil, err
+	}
 	_, err = client.BsPutItem(ctx, "user", tItem)
 	if err != nil {
 		return nil, err
@@ -164,6 +174,16 @@ func (t thriftHandler) GetItemByUID(ctx context.Context, id int16) (r user_item.
 	var c = BigSetKV.TStringKey(strconv.Itoa(int(id)) + "_itembyUID")
 	var b user_item.TItem
 	var list user_item.ItemListById
+	bDataId, _ := json.Marshal(id)
+	checkExist, err := client.BsGetItem(ctx, "user", bDataId)
+	if err != nil {
+		return nil, err
+	}
+	if checkExist.Item == nil {
+		err = errors.New("User này chưa tồn tại")
+		return nil, err
+	}
+
 	length, _ := client.GetTotalCount(ctx, "item")
 	result, _ := client.BsGetSlice(ctx, "item", 0, int32(length))
 	for _, a := range result.Items.Items {
