@@ -53,8 +53,8 @@ struct TItem{
 	4: string Name
 	5: i16 Status
 	6: i16 CollectionId
-	7: i16 CreateTime 
-	8: i16 UpdateTime
+	7: i64 CreateTime
+	8: i64 UpdateTime
 	9: map<string,i16> ArrOwnerAddress
 	10:map<string,i16> ArrOwnerUid
 	11:string CreatorAddress

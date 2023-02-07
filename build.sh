@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 echo "Chaỵ Binary BSServiceMap trong terminal"
 
-swag init --dir ./ --generalInfo routes/router.go --propertyStrategy snakecase --output ./routes/docs;
+swag swag init --dir ./ --generalInfo clientgin/client1.go --propertyStrategy snakecase --output ./routes/docs;
 
 echo "Build Server"
 # shellcheck disable=SC2164

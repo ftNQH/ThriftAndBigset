@@ -1,4 +1,85 @@
 definitions:
+  main.RequestItem:
+    properties:
+      arrOwnerAddress:
+        additionalProperties:
+          type: integer
+        type: object
+      arrOwnerUid:
+        additionalProperties:
+          type: integer
+        type: object
+      categoryType:
+        type: integer
+      chain:
+        type: string
+      collectionId:
+        type: integer
+      contractAddress:
+        type: string
+      creatorAddress:
+        type: string
+      creatorUid:
+        type: integer
+      currencyAddress:
+        $ref: '#/definitions/user_item.TCurrencyAddress'
+      edition:
+        type: integer
+      endAt:
+        type: integer
+      eventIds:
+        items:
+          type: integer
+        type: array
+      extendData:
+        $ref: '#/definitions/user_item.TExtendData'
+      externalLink:
+        type: string
+      hidden:
+        type: boolean
+      imageUrl:
+        type: string
+      isLootbox:
+        type: boolean
+      isSensitive:
+        type: boolean
+      mediaType:
+        type: string
+      metaData:
+        type: string
+      name:
+        type: string
+      ownerAddress:
+        type: string
+      ownerUID:
+        type: integer
+      price:
+        type: string
+      productNo:
+        type: string
+      startAt:
+        type: integer
+      status:
+        type: integer
+      tokenId:
+        type: string
+      totalClaim:
+        type: integer
+      totalEdition:
+        type: integer
+      totalLike:
+        type: integer
+      totalLimit:
+        type: integer
+      totalView:
+        type: integer
+      typeNft:
+        type: integer
+      unlockableContent:
+        type: string
+      url:
+        type: string
+    type: object
   user_item.TCurrencyAddress:
     properties:
       Address:
@@ -210,12 +291,12 @@ paths:
       - application/json
       description: do ping
       parameters:
-      - description: 'Thông tin item mới '
+      - description: 'Thông tin Item mới '
         in: body
         name: NewItem
         required: true
         schema:
-          $ref: '#/definitions/user_item.TItem'
+          $ref: '#/definitions/main.RequestItem'
       produces:
       - application/json
       responses:

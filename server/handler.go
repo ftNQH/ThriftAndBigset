@@ -88,21 +88,38 @@ func (t thriftHandler) AddItem(ctx context.Context, id int16, item *user_item.TI
 	var connTimeout = time.Second * 3600
 	client, _, transport := GetConnect(host, port, connTimeout)
 	defer transport.Close()
-	bDataId, _ := json.Marshal(id)
-	result, err := client.BsGetItem(ctx, "item", bDataId)
+	bDataId, _ := json.Marshal(1)
+	max, err := client.BsGetItem(ctx, "MaxID", bDataId)
 	if err != nil {
 		return nil, err
 	}
-	if result.Item != nil {
-		err = errors.New("Item đã tồn tại")
+	if max.Item == nil {
+		err = errors.New("Không thấy giá trị trong bigset MaxID")
 		return nil, err
 	}
+	var b int32
+	err = json.Unmarshal(max.Item.Value, &b)
+	if err != nil {
+		return nil, err
+	}
+	item.ID = b + 1
+	item.CreateTime = time.Now().Unix()
+	item.UpdateTime = time.Now().Unix()
 	bData, _ := json.Marshal(item)
 	tItem := BigSetKV.NewTItem()
 	tItem.Value = bData
 	strKey := strconv.FormatInt(int64(item.ID), 10)
 	tItem.Key = []byte(strKey)
 	_, err = client.BsPutItem(ctx, "item", tItem)
+	if err != nil {
+		return nil, err
+	}
+	tID := BigSetKV.NewTItem()
+	cData, err := json.Marshal(item.ID)
+	tID.Value = cData
+	strKey = strconv.FormatInt(1, 10)
+	tID.Key = []byte(strKey)
+	_, err = client.BsPutItem(ctx, "MaxID", tID)
 	if err != nil {
 		return nil, err
 
@@ -129,6 +146,10 @@ func (t thriftHandler) EditItems(ctx context.Context, id int16, item *user_item.
 
 	var b BigSetKV.TItem
 	a, _ := json.Marshal(item)
+	if id != int16(item.ID) {
+		err = errors.New("Không thể sửa id của Item")
+		return nil, err
+	}
 	b.Key = c
 	b.Value = a
 	_, err = client.BsPutItem(ctx, "item", &b)
@@ -186,6 +207,7 @@ func (t thriftHandler) GetItemByUID(ctx context.Context, id int16) (r user_item.
 
 	length, _ := client.GetTotalCount(ctx, "item")
 	result, _ := client.BsGetSlice(ctx, "item", 0, int32(length))
+	_, err = client.RemoveAll(ctx, c)
 	for _, a := range result.Items.Items {
 		err := json.Unmarshal(a.Value, &b)
 		if err != nil {

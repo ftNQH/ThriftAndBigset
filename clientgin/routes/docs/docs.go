@@ -66,12 +66,12 @@ const docTemplate = `{
                 "summary": "ping example",
                 "parameters": [
                     {
-                        "description": "Thông tin item mới ",
+                        "description": "Thông tin Item mới ",
                         "name": "NewItem",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/user_item.TItem"
+                            "$ref": "#/definitions/main.RequestItem"
                         }
                     }
                 ],
@@ -236,6 +236,128 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "main.RequestItem": {
+            "type": "object",
+            "properties": {
+                "arrOwnerAddress": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "integer"
+                    }
+                },
+                "arrOwnerUid": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "integer"
+                    }
+                },
+                "categoryType": {
+                    "type": "integer"
+                },
+                "chain": {
+                    "type": "string"
+                },
+                "collectionId": {
+                    "type": "integer"
+                },
+                "contractAddress": {
+                    "type": "string"
+                },
+                "creatorAddress": {
+                    "type": "string"
+                },
+                "creatorUid": {
+                    "type": "integer"
+                },
+                "currencyAddress": {
+                    "$ref": "#/definitions/user_item.TCurrencyAddress"
+                },
+                "edition": {
+                    "type": "integer"
+                },
+                "endAt": {
+                    "type": "integer"
+                },
+                "eventIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "extendData": {
+                    "$ref": "#/definitions/user_item.TExtendData"
+                },
+                "externalLink": {
+                    "type": "string"
+                },
+                "hidden": {
+                    "type": "boolean"
+                },
+                "imageUrl": {
+                    "type": "string"
+                },
+                "isLootbox": {
+                    "type": "boolean"
+                },
+                "isSensitive": {
+                    "type": "boolean"
+                },
+                "mediaType": {
+                    "type": "string"
+                },
+                "metaData": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "ownerAddress": {
+                    "type": "string"
+                },
+                "ownerUID": {
+                    "type": "integer"
+                },
+                "price": {
+                    "type": "string"
+                },
+                "productNo": {
+                    "type": "string"
+                },
+                "startAt": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "tokenId": {
+                    "type": "string"
+                },
+                "totalClaim": {
+                    "type": "integer"
+                },
+                "totalEdition": {
+                    "type": "integer"
+                },
+                "totalLike": {
+                    "type": "integer"
+                },
+                "totalLimit": {
+                    "type": "integer"
+                },
+                "totalView": {
+                    "type": "integer"
+                },
+                "typeNft": {
+                    "type": "integer"
+                },
+                "unlockableContent": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
         "user_item.TCurrencyAddress": {
             "type": "object",
             "properties": {

@@ -7,8 +7,9 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/apache/thrift/lib/go/thrift"
 	"reflect"
+
+	"github.com/apache/thrift/lib/go/thrift"
 )
 
 // (needed to ensure safety because of naive import list construction.)
@@ -1951,8 +1952,8 @@ type TItem struct {
 	Name              string            `thrift:"Name,4" db:"Name" json:"Name"`
 	Status            int16             `thrift:"Status,5" db:"Status" json:"Status"`
 	CollectionId      int16             `thrift:"CollectionId,6" db:"CollectionId" json:"CollectionId"`
-	CreateTime        int16             `thrift:"CreateTime,7" db:"CreateTime" json:"CreateTime"`
-	UpdateTime        int16             `thrift:"UpdateTime,8" db:"UpdateTime" json:"UpdateTime"`
+	CreateTime        int64             `thrift:"CreateTime,7" db:"CreateTime" json:"CreateTime"`
+	UpdateTime        int64             `thrift:"UpdateTime,8" db:"UpdateTime" json:"UpdateTime"`
 	ArrOwnerAddress   map[string]int16  `thrift:"ArrOwnerAddress,9" db:"ArrOwnerAddress" json:"ArrOwnerAddress"`
 	ArrOwnerUid       map[string]int16  `thrift:"ArrOwnerUid,10" db:"ArrOwnerUid" json:"ArrOwnerUid"`
 	CreatorAddress    string            `thrift:"CreatorAddress,11" db:"CreatorAddress" json:"CreatorAddress"`
@@ -2014,11 +2015,11 @@ func (p *TItem) GetCollectionId() int16 {
 	return p.CollectionId
 }
 
-func (p *TItem) GetCreateTime() int16 {
+func (p *TItem) GetCreateTime() int64 {
 	return p.CreateTime
 }
 
-func (p *TItem) GetUpdateTime() int16 {
+func (p *TItem) GetUpdateTime() int64 {
 	return p.UpdateTime
 }
 
@@ -2241,7 +2242,7 @@ func (p *TItem) Read(iprot thrift.TProtocol) error {
 				}
 			}
 		case 7:
-			if fieldTypeId == thrift.I16 {
+			if fieldTypeId == thrift.I64 {
 				if err := p.ReadField7(iprot); err != nil {
 					return err
 				}
@@ -2251,7 +2252,7 @@ func (p *TItem) Read(iprot thrift.TProtocol) error {
 				}
 			}
 		case 8:
-			if fieldTypeId == thrift.I16 {
+			if fieldTypeId == thrift.I64 {
 				if err := p.ReadField8(iprot); err != nil {
 					return err
 				}
@@ -2643,7 +2644,7 @@ func (p *TItem) ReadField6(iprot thrift.TProtocol) error {
 }
 
 func (p *TItem) ReadField7(iprot thrift.TProtocol) error {
-	if v, err := iprot.ReadI16(); err != nil {
+	if v, err := iprot.ReadI64(); err != nil {
 		return thrift.PrependError("error reading field 7: ", err)
 	} else {
 		p.CreateTime = v
@@ -2652,7 +2653,7 @@ func (p *TItem) ReadField7(iprot thrift.TProtocol) error {
 }
 
 func (p *TItem) ReadField8(iprot thrift.TProtocol) error {
-	if v, err := iprot.ReadI16(); err != nil {
+	if v, err := iprot.ReadI64(); err != nil {
 		return thrift.PrependError("error reading field 8: ", err)
 	} else {
 		p.UpdateTime = v
@@ -3199,10 +3200,10 @@ func (p *TItem) writeField6(oprot thrift.TProtocol) (err error) {
 }
 
 func (p *TItem) writeField7(oprot thrift.TProtocol) (err error) {
-	if err := oprot.WriteFieldBegin("CreateTime", thrift.I16, 7); err != nil {
+	if err := oprot.WriteFieldBegin("CreateTime", thrift.I64, 7); err != nil {
 		return thrift.PrependError(fmt.Sprintf("%T write field begin error 7:CreateTime: ", p), err)
 	}
-	if err := oprot.WriteI16(int16(p.CreateTime)); err != nil {
+	if err := oprot.WriteI64(int64(p.CreateTime)); err != nil {
 		return thrift.PrependError(fmt.Sprintf("%T.CreateTime (7) field write error: ", p), err)
 	}
 	if err := oprot.WriteFieldEnd(); err != nil {
@@ -3212,10 +3213,10 @@ func (p *TItem) writeField7(oprot thrift.TProtocol) (err error) {
 }
 
 func (p *TItem) writeField8(oprot thrift.TProtocol) (err error) {
-	if err := oprot.WriteFieldBegin("UpdateTime", thrift.I16, 8); err != nil {
+	if err := oprot.WriteFieldBegin("UpdateTime", thrift.I64, 8); err != nil {
 		return thrift.PrependError(fmt.Sprintf("%T write field begin error 8:UpdateTime: ", p), err)
 	}
-	if err := oprot.WriteI16(int16(p.UpdateTime)); err != nil {
+	if err := oprot.WriteI64(int64(p.UpdateTime)); err != nil {
 		return thrift.PrependError(fmt.Sprintf("%T.UpdateTime (8) field write error: ", p), err)
 	}
 	if err := oprot.WriteFieldEnd(); err != nil {
